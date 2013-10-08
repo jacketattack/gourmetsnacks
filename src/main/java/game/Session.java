@@ -16,38 +16,70 @@ public class Session
 	private int roundAt;
 	private ArrayList<Character> characters;
 	private Map map;
-        
+        /**
+         * The Session constructor associates a new session with a group
+         * of players
+         * 
+         * 
+         * @param characters -the character in the game
+         */
 	public Session(ArrayList<Character> characters)
 	{
 		this.characters = characters;
 		roundAt = 1;
 	}
-	
+	/**
+         * 
+         * The getCharacters gives an ArrayList of all characters
+         * 
+         * @return  ArrayList characters - the characters in the game
+         */
 	public ArrayList<Character> getCharacters()
 	{
 		return characters;
 	}
-       
+       /**
+        * The getRound method returns the current round.
+        * 
+        * @return int roundAt- the current round of the game.
+        */
 	public int getRoundAt()
 	{
 		return roundAt;
 	}
-	
+	/**
+         * 
+         * The incrementRound increments roundAt.
+         * 
+         */
 	public void incrementRound()
 	{
 		roundAt++;
 	}
-	
-    public void setMap(Map map) 
-    {
-        this.map = map;
-    }
-    
-    public Map getMap()
-    {
-    	return map;
-    }
-        
+	/**
+         * The setMap method associates a map with the current session
+         * 
+         * @param map-the map associated with this session 
+         */
+        public void setMap(Map map) 
+        {
+            this.map = map;
+        }
+        /**
+         * The getMap method returns the map of the session
+         * 
+         * 
+         * @return Map map - the map of the session 
+         */
+        public Map getMap()
+        {
+            return map;
+        }
+        /**
+         * The toString gives a representation of the current state of the game.
+         * 
+         * @return String toString - a string representing the core data of the game
+         */
 	public String toString()
 	{
 		String mapText = "";
