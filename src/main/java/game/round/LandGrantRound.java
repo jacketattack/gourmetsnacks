@@ -131,8 +131,9 @@ public class LandGrantRound extends Round
 	 * @param yGridPos index of column in array of plots
 	 * @param cost cost of plot (in this round either $0 or $300)
 	 */
-	private void buyProperty(int xGridPos, int yGridPos, int cost) 
+	public void buyProperty(int xGridPos, int yGridPos, int cost)
 	{
+        System.out.println(session);
         Plot plot = session.getPlot(xGridPos, yGridPos);
         
         if (plot.isOwned())
@@ -150,7 +151,7 @@ public class LandGrantRound extends Round
         session.setPlayerMoney(id, currentMoney - cost);
         
         // if player does not have enough money to even purchase one more plot, then remove from ArrayList
-        if (session.getPlayerMoney(id) < PLOT_COST) 
+        if (session.getPlayerMoney(id) < PLOT_COST)
  		{
  			playerIds.remove(currentPlayerIndex);
  		}
