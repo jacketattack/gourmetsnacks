@@ -40,7 +40,7 @@ public class BuyPropertyTest extends TestCase
         round.setSession(session);
         round.init();
 
-        System.out.println(id2);
+
 
         //Player 1
 
@@ -48,8 +48,6 @@ public class BuyPropertyTest extends TestCase
         round.click(0,Plot.SIZE*1+1,true);
         round.click(Plot.SIZE + 1 , 0 , true);
         round.click(Plot.SIZE+1, Plot.SIZE+1,true);
-        System.out.println("current id is person 2" + session.getCurrentPlayerId().equals(id2));
-        System.out.println(session.getPlayerMoney(id2));
         round.click(Plot.SIZE*2 + 1, Plot.SIZE*2 + 1,true );
         round.click(Plot.SIZE*3 + 1, Plot.SIZE*1 + 1,true );
         round.click(Plot.SIZE*3 + 1, 1,true );
@@ -62,4 +60,77 @@ public class BuyPropertyTest extends TestCase
         assertEquals(bought ,false);
 
     }
+    @Test
+    public void testKickOutPoorPlayers () {
+        session.setMap(new Map(true));
+        session.setPlayerType(id1, PlayerType.FLAPPER);
+        session.setPlayerType(id2, PlayerType.HUMAN);
+        round.setSession(session);
+        round.init();
+
+
+
+        //Player 1
+
+        round.click(0,0,true);
+        round.click(0,Plot.SIZE*1+1,true);
+        round.click(Plot.SIZE + 1 , 0 , true);
+        round.click(Plot.SIZE+1, Plot.SIZE+1,true);
+        round.click(Plot.SIZE*2 + 1, Plot.SIZE*2 + 1,true );
+        round.click(Plot.SIZE*3 + 1, Plot.SIZE*1 + 1,true );
+        round.click(Plot.SIZE*3 + 1, 1,true );
+        round.click(Plot.SIZE*3 + 1, Plot.SIZE*3 + 1,true );
+
+        round.click(Plot.SIZE*4+1,1,true);//player is now kicked out
+
+        round.click(Plot.SIZE*4+1,Plot.SIZE*1+1,true);
+        round.click(Plot.SIZE*4+1,Plot.SIZE*2+1,true);
+        int moneyBefore = session.getPlayerMoney(id1) - 300;
+        round.click(1,Plot.SIZE *3,true);
+        int moneyAfter = (session.getPlayerMoney(id1));
+        assertEquals(moneyAfter,moneyBefore);
+    }
+
+
+    @Test
+    public void testFreePlots(){
+        session.setMap(new Map(true));
+        session.setPlayerType(id1, PlayerType.FLAPPER);
+        session.setPlayerType(id2, PlayerType.HUMAN);
+        round.setSession(session);
+        round.init();
+
+        int moneyBeforeA = session.getPlayerMoney(id1);
+        int moneyBeforeB = session.getPlayerMoney(id2);
+
+        round.click(0,0,true);
+        round.click(0,Plot.SIZE*1+1,true);
+        round.click(Plot.SIZE + 1 , 0 , true);
+        round.click(Plot.SIZE+1, Plot.SIZE+1,true);
+
+        int moneyAfterA = session.getPlayerMoney(id1);
+        int moneyAfterB = session.getPlayerMoney(id2);
+
+        assertEquals(moneyBeforeA,moneyAfterA);
+        assertEquals(moneyBeforeB,moneyAfterB);
+    }
+
+    @Test
+    public void testOtherPeoplesPlots () {
+        session.setMap(new Map(true));
+        session.setPlayerType(id1, PlayerType.FLAPPER);
+        session.setPlayerType(id2, PlayerType.HUMAN);
+        round.setSession(session);
+        round.init();
+
+        round.click(0,0,true);
+        round.click(0,Plot.SIZE*1+1,true);
+        round.click(Plot.SIZE + 1 , 0 , true);
+        String current = session.getCurrentPlayerId();
+        round.click(Plot.SIZE+1, 0,true);
+        String after = session.getCurrentPlayerId();
+        assertEquals(current,after);
+    }
+
+
 }

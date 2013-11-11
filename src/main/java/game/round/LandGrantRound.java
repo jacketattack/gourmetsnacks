@@ -133,7 +133,7 @@ public class LandGrantRound extends Round
 	 */
 	private void buyProperty(int xGridPos, int yGridPos, int cost)
 	{
-        System.out.println(session);
+      ;
         Plot plot = session.getPlot(xGridPos, yGridPos);
         
         if (plot.isOwned())
