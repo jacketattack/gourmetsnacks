@@ -131,7 +131,7 @@ public class LandGrantRound extends Round
 	 * @param yGridPos index of column in array of plots
 	 * @param cost cost of plot (in this round either $0 or $300)
 	 */
-	public void buyProperty(int xGridPos, int yGridPos, int cost)
+	private void buyProperty(int xGridPos, int yGridPos, int cost)
 	{
         System.out.println(session);
         Plot plot = session.getPlot(xGridPos, yGridPos);
