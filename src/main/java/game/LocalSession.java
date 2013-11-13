@@ -385,7 +385,7 @@ public class LocalSession implements Session, Serializable
 		return map.get(x, y);
 	}
 
-	public void setTimer(int n) 
+	public void setTimer(int n)
 	{
 		timer = n;
 	}
