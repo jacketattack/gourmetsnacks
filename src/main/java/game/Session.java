@@ -317,8 +317,7 @@ public interface Session
 	public int getCurrentRound();
 
 	/**
-	 * Increment the current round. The game should save
-	 * when this is called
+	 * Increment the current round
 	 */
 	public void incrementRound();
 
@@ -350,17 +349,6 @@ public interface Session
 	 * Decrement the timer's value
 	 */
 	public void decrementTimer();
-
-	/**
-	 * Get the saved session
-	 * @return The saved session
-	 */
-	public Session getSaveCopy();
-
-	/**
-	 * Force the session to save a copy of itself
-	 */
-	public void forceSave();
 
     /**
      * Get the session's id
