@@ -83,6 +83,8 @@ public class GameState implements State
 		
 		paused = false;
 		pauseDelay = 0;
+
+		session.forceSave();
 	}
 	
 	/**

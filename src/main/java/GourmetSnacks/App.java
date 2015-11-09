@@ -6,6 +6,8 @@ import ui.Window;
 
 import core.EventLoop;
 import core.IdGenerator;
+import core.db.MongoDB;
+import core.db.DB;
 
 /**
  * Entry point of the application
@@ -14,6 +16,12 @@ public class App
 {
     public static void main( String[] args )
     {
+    	DB db = DB.getInstance();
+    	db.use(new MongoDB());
+
+    	Config config = Config.getInstance();
+        config.load();
+    	
         IdGenerator.getId();
 		EventQueue.invokeLater(new Runnable()
 		{

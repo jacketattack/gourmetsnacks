@@ -6,6 +6,8 @@ package game.state;
  * Just like phantom nodes in linked lists, the 
  * purpose of this class is to avoid the need to
  * check for null.
+ * 
+ * @author grant
  */
 public class DefaultState implements State 
 {
