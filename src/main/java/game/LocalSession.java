@@ -7,11 +7,7 @@ import java.util.Comparator;
 
 import ui.render.Render;
 
-import com.mongodb.BasicDBList;
-
 import core.IdGenerator;
-import core.db.DB;
-import core.db.DatabaseObject;
 
 /**
  * The LocalSession stores all game data in memory.
@@ -34,9 +30,6 @@ public class LocalSession implements Session
 	private int timer;
 	/** Current round num */
 	private int roundNum;
-	
-	/** Copy of the LocalSession after each round */
-	private LocalSession saveCopy;
 
 	/** The unique id of the session */
     private String id;
@@ -48,210 +41,8 @@ public class LocalSession implements Session
 	{
 		players = new ArrayList<>();
 		roundNum = 0;
-
-        DB db = DB.getInstance();
-        
-        // find a unique id in the database
-        id = IdGenerator.getId();
-        while (db.exists("save", id))
-        {
-            id = IdGenerator.getId();
-        }
-        
-        save();
 	}
 
-	/**
-	 * Reconstruct a Session from a DatabaseObject
-	 * @param data The saved data
-	 */
-	public LocalSession(DatabaseObject data)
-	{	
-		this.id = (String)data.get("id");
-		this.timer = (Integer)data.get("timer");
-		this.roundNum = (Integer)data.get("roundNum");
-		this.currentPlayerIndex = (Integer)data.get("currentPlayerIndex");
-		
-		BasicDBList playerIds = (BasicDBList)data.get("playerIds");
-		
-		// Grab all the data for each player
-		players = new ArrayList<>();
-		for (Object idObject : playerIds)
-		{
-			String id = (String)idObject;
-			String accessor = "player_" + id + "_";
-			Player player = new Player(false);
-			player.setId(id);
-			player.setName((String)data.get(accessor + "name"));
-		
-			// set player color
-			int red = (Integer)data.get(accessor + "colorRed");
-			int green = (Integer)data.get(accessor + "colorGreen");
-			int blue = (Integer)data.get(accessor + "colorBlue");
-			Color color;
-			if (red == 255 && green == 255 && blue == 0)
-			{
-				color = Color.BLACK;
-			}
-			else if (red == 255)
-			{
-				color = Color.RED;
-			}
-			else if (green == 255)
-			{
-				color = Color.GREEN;
-			}
-			else
-			{
-				color = Color.BLUE;
-			}
-			player.setColor(color);
-			
-			String type = (String)data.get(accessor + "type");
-			if (type.equals("HUMAN"))
-			{
-				player.setType(PlayerType.HUMAN);
-			} 
-			else if (type.equals("FLAPPER"))
-			{
-				player.setType(PlayerType.FLAPPER);
-			} 
-			else if (type.equals("BONZOID"))
-			{
-				player.setType(PlayerType.BONZOID);
-			} 
-			else if (type.equals("UGAITE"))
-			{
-				player.setType(PlayerType.UGAITE);
-			} 
-			else if (type.equals("BUZZITE"))
-			{
-				player.setType(PlayerType.BUZZITE);
-			}
-			
-			player.setX((Integer)data.get(accessor + "x"));
-			player.setY((Integer)data.get(accessor + "y"));
-			
-			player.incrementMoney((Integer)data.get(accessor + "money"));
-			player.incrementOre((Integer)data.get(accessor + "ore"));
-			player.incrementFood((Integer)data.get(accessor + "food"));
-			player.incrementEnergy((Integer)data.get(accessor + "energy"));
-			player.incrementCrystite((Integer)data.get(accessor + "crystite"));
-			
-			BasicDBList plots = (BasicDBList) data.get(accessor + "plots");
-			for (Object plotId : plots)
-			{
-				player.addPlot((String)plotId);
-
-			}
-			
-			players.add(player);
-		}
-		
-		map = new Map(false);
-
-		// Grab all the data for each plot
-		for (int a = 0; a < Map.HEIGHT; a++)
-		{
-			for (int b = 0; b < Map.WIDTH; b++)
-			{
-				String accessor = "plot_" + a + "x" + b;
-				String typeString = (String)data.get(accessor);				
-				PlotType type;
-				if (typeString == null)
-				{
-					type = PlotType.PLAIN;
-				}
-				else if (typeString.equals("PLAIN"))
-				{
-					type = PlotType.PLAIN;
-				} 
-				else if (typeString.equals("RIVER"))
-				{
-					type = PlotType.RIVER;
-				} 
-				else if (typeString.equals("MOUNTAIN_1"))
-				{
-					type = PlotType.MOUNTAIN_1;
-				} 
-				else if (typeString.equals("MOUNTAIN_2"))
-				{
-					type = PlotType.MOUNTAIN_2;
-				} 
-				else if (typeString.equals("MOUNTAIN_3"))
-				{
-					type = PlotType.MOUNTAIN_3;
-				}
-				else
-				{
-					type = PlotType.TOWN;
-				}
-
-				Plot plot = new Plot(type, a, b);	
-				
-				ImprovementType improvementType;
-				String improvementTypeString = (String)data.get(accessor + "_improvement");
-				if (improvementTypeString == null)
-				{
-					improvementType = ImprovementType.EMPTY;
-				} 
-				else if (improvementTypeString.equals("EMPTY"))
-				{
-					improvementType = ImprovementType.EMPTY;
-				}
-				else if (improvementTypeString.equals("FOOD"))
-				{
-					improvementType = ImprovementType.FOOD;
-				}
-				else if (improvementTypeString.equals("ENERGY"))
-				{
-					improvementType = ImprovementType.ENERGY;
-				}
-				else if (improvementTypeString.equals("ORE"))
-				{
-					improvementType = ImprovementType.ORE;
-				}
-				else if (improvementTypeString.equals("CRYSTITE"))
-				{
-					improvementType = ImprovementType.CRYSTITE;
-				}
-				else
-				{
-					improvementType = ImprovementType.EMPTY;
-				}
-				plot.setImprovementType(improvementType);
-
-				// set plot color
-				if (data.get(accessor + "_colorRed") != null)
-				{
-					int red = (Integer)data.get(accessor + "_colorRed");
-					int green = (Integer)data.get(accessor + "_colorGreen");
-					int blue = (Integer)data.get(accessor + "_colorBlue");
-					Color color;
-					if (red == 255 && green == 255 && blue == 0)
-					{
-						color = Color.BLACK;
-					}
-					else if (red == 255)
-					{
-						color = Color.RED;
-					}
-					else if (green == 255)
-					{
-						color = Color.GREEN;
-					}
-					else
-					{
-						color = Color.BLUE;
-					}
-					plot.setColor(color);
-				}
-				
-				map.set(b, a, plot);
-			}
-		}
-	}
-	
 	/**
 	 * Copy a LocalSession into a new LocalSession
 	 * @param session The LocalSession to copy
@@ -806,14 +597,11 @@ public class LocalSession implements Session
 	}
 
 	/**
-	 * Increment the current round. The game is saved
-	 * when this is called
+	 * Increment the current round.
 	 */
 	public void incrementRound() 
 	{
 		roundNum++;
-		saveCopy = copy();
-		save();
 	}
 
 	/**
@@ -859,100 +647,6 @@ public class LocalSession implements Session
 		timer--;
 	}
 	
-	/**
-	 * Get the saved session
-	 * @return The saved session
-	 */
-	public Session getSaveCopy()
-	{
-		return saveCopy;
-	}
-	
-	/**
-	 * Force the session to save a copy of itself
-	 */
-	public void forceSave()
-	{
-		saveCopy = copy();
-		save();
-	}
-	
-	/**
-	 * Get the DatabaseObject representation of the session
-	 * @return The DatabaseObject
-	 */
-	public DatabaseObject getDatabaseObject()
-    {
-        DatabaseObject save = new DatabaseObject();
-        
-        save.put("id", id);
-        save.put("timer", timer);
-        save.put("roundNum", roundNum);
-        save.put("currentPlayerIndex", currentPlayerIndex);
-        save.put("playerIds", getPlayerIds());
-        
-        for (Player player : players)
-        {                        
-            String id = "player_" + player.getId() + "_";
-            save.put(id + "id", player.getId());
-            save.put(id + "name", player.getName());
-            save.put(id + "colorRed", player.getColor().getRed());
-            save.put(id + "colorGreen", player.getColor().getGreen());
-            save.put(id + "colorBlue", player.getColor().getBlue());
-            save.put(id + "type", player.getType().toString());
-            save.put(id + "x", player.getX());
-            save.put(id + "y", player.getY());
-            
-            save.put(id + "money", player.getMoney());
-            save.put(id + "ore", player.getOre());
-            save.put(id + "food", player.getFood());
-            save.put(id + "energy", player.getEnergy());
-            save.put(id + "crystite", player.getCrystite());
-            
-            ArrayList<String> plotIds = new ArrayList<>();
-            for (String plotId : getPlayerOwnedPlotIds(player.getId()))
-            {
-            	plotIds.add(plotId);
-            }
-            save.put(id + "plots", plotIds);
-        }
-        
-        if (map != null)
-        {
-            for (int a = 0; a < Map.HEIGHT; a++)
-            {
-                for (int b = 0; b < Map.WIDTH; b++)
-                {
-                    Plot plot = map.get(b, a);
-                    save.put("plot_" + plot.getId(), plot.getPlotType().toString());
-                    save.put("plot_" + plot.getId() + "_improvement", plot.getImprovementType().toString());
-                    if (plot.getColor() != null)
-                    {
-                        save.put("plot_" + plot.getId() + "_colorRed", plot.getColor().getRed());
-                        save.put("plot_" + plot.getId() + "_colorGreen", plot.getColor().getGreen());
-                        save.put("plot_" + plot.getId() + "_colorBlue", plot.getColor().getBlue());
-                    }
-                }
-            }        
-        }
-        
-        return save;
-    }
-    
-	/**
-	 * Save the session to the database
-	 */
-    private void save()
-    {
-        if (saveCopy == null)
-        {
-            saveCopy = copy();
-        }
-        
-        DB db = DB.getInstance();
-        db.put("saves", id, saveCopy.getDatabaseObject());
-    }
-    
     /**
      * Return a copy of the session
      * @return The copied session
